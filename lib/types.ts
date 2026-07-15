@@ -4,8 +4,11 @@ export interface User {
   id: string;
   name: string;
   role: Role;
-  pin: string;
+  salt: string;
+  pinHash: string; // sha256(`${salt}:${pin}`)
   position: string;
+  wage: number; // 시급 (원)
+  active: boolean;
 }
 
 export interface Report {
@@ -27,6 +30,14 @@ export interface Shift {
   start: string; // HH:mm
   end: string; // HH:mm
   memo: string;
+}
+
+export interface Attendance {
+  id: string;
+  userId: string;
+  date: string; // YYYY-MM-DD (출근한 날)
+  clockIn: string; // ISO
+  clockOut: string | null; // ISO, 근무 중이면 null
 }
 
 export type SwapStatus = "pending" | "accepted" | "cancelled";
@@ -64,6 +75,7 @@ export interface Database {
   users: User[];
   reports: Report[];
   shifts: Shift[];
+  attendances: Attendance[];
   swapRequests: SwapRequest[];
   posts: Post[];
 }

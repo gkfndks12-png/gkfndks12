@@ -7,9 +7,12 @@ const MENU = [
   { href: "/reports", label: "업무 보고" },
   { href: "/schedule", label: "근무표" },
   { href: "/board", label: "게시판" },
+  { href: "/pay", label: "급여" },
 ];
 
 export default function Nav({ user }: { user: User }) {
+  const menu =
+    user.role === "owner" ? [...MENU, { href: "/staff", label: "직원" }] : MENU;
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
@@ -17,7 +20,7 @@ export default function Nav({ user }: { user: User }) {
           알바톡
         </Link>
         <nav className="flex items-center gap-1 text-sm">
-          {MENU.map((m) => (
+          {menu.map((m) => (
             <Link
               key={m.href}
               href={m.href}

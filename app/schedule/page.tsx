@@ -204,7 +204,7 @@ export default function SchedulePage({
                   <label className="label" htmlFor="shift-user">직원</label>
                   <select id="shift-user" name="userId" className="input" required>
                     {db.users
-                      .filter((u) => u.role === "staff")
+                      .filter((u) => u.role === "staff" && u.active)
                       .map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.name} ({u.position})

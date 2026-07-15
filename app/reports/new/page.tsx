@@ -6,9 +6,23 @@ import { todayStr } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default function NewReportPage() {
+export default function NewReportPage({
+  searchParams,
+}: {
+  searchParams: { date?: string; start?: string; end?: string };
+}) {
   const user = getCurrentUser();
   if (!user) redirect("/login");
+
+  const defaultDate = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date ?? "")
+    ? searchParams.date!
+    : todayStr();
+  const defaultStart = /^\d{2}:\d{2}$/.test(searchParams.start ?? "")
+    ? searchParams.start
+    : undefined;
+  const defaultEnd = /^\d{2}:\d{2}$/.test(searchParams.end ?? "")
+    ? searchParams.end
+    : undefined;
 
   return (
     <>
@@ -24,17 +38,31 @@ export default function NewReportPage() {
                 name="date"
                 type="date"
                 className="input"
-                defaultValue={todayStr()}
+                defaultValue={defaultDate}
                 required
               />
             </div>
             <div>
               <label className="label" htmlFor="start">출근</label>
-              <input id="start" name="start" type="time" className="input" required />
+              <input
+                id="start"
+                name="start"
+                type="time"
+                className="input"
+                defaultValue={defaultStart}
+                required
+              />
             </div>
             <div>
               <label className="label" htmlFor="end">퇴근</label>
-              <input id="end" name="end" type="time" className="input" required />
+              <input
+                id="end"
+                name="end"
+                type="time"
+                className="input"
+                defaultValue={defaultEnd}
+                required
+              />
             </div>
           </div>
           <div>

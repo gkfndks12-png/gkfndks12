@@ -3,7 +3,13 @@ import { redirect } from "next/navigation";
 import Nav from "@/components/Nav";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { formatDateTime, formatShort, todayStr } from "@/lib/utils";
+import { clockIn, clockOut } from "@/lib/actions";
+import {
+  formatDateTime,
+  formatShort,
+  formatTimeHM,
+  todayStr,
+} from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +34,13 @@ export default function HomePage() {
   const recentReports = db.reports.slice(0, 3);
   const recentPosts = db.posts.slice(0, 3);
 
+  const openAttendance = db.attendances.find(
+    (a) => a.userId === user.id && a.clockOut === null
+  );
+  const doneToday = db.attendances.find(
+    (a) => a.userId === user.id && a.date === today && a.clockOut !== null
+  );
+
   return (
     <>
       <Nav user={user} />
@@ -47,6 +60,47 @@ export default function HomePage() {
             🙋 대타 요청 <b>{pendingSwaps.length}건</b>이 수락을 기다리고
             있어요. 근무표에서 확인해주세요.
           </Link>
+        )}
+
+        {user.role === "staff" && (
+          <section className="card">
+            <h2 className="mb-3 font-semibold">⏰ 출퇴근 체크</h2>
+            {openAttendance ? (
+              <div className="flex items-center justify-between">
+                <p className="text-sm">
+                  <span className="badge bg-green-100 text-green-700">근무 중</span>
+                  <span className="ml-2 text-slate-600">
+                    {formatTimeHM(openAttendance.clockIn)} 출근
+                  </span>
+                </p>
+                <form action={clockOut}>
+                  <button className="btn-primary">퇴근하기</button>
+                </form>
+              </div>
+            ) : doneToday ? (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-600">
+                  오늘 근무 완료 — {formatTimeHM(doneToday.clockIn)} ~{" "}
+                  {formatTimeHM(doneToday.clockOut!)}
+                </p>
+                <Link
+                  href={`/reports/new?date=${doneToday.date}&start=${formatTimeHM(
+                    doneToday.clockIn
+                  )}&end=${formatTimeHM(doneToday.clockOut!)}`}
+                  className="btn-primary"
+                >
+                  보고서 작성 →
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-500">아직 출근 전입니다.</p>
+                <form action={clockIn}>
+                  <button className="btn-primary">출근하기</button>
+                </form>
+              </div>
+            )}
+          </section>
         )}
 
         <div className="grid gap-4 sm:grid-cols-2">

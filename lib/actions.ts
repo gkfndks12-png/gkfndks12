@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getDb, saveDb, newId } from "./db";
 import { getCurrentUser } from "./auth";
+import { encodeSession, hashPin, newSalt } from "./security";
+import { todayStr } from "./utils";
 
 // ---------- 인증 ----------
 
@@ -13,10 +15,10 @@ export async function login(formData: FormData) {
   const pin = String(formData.get("pin") ?? "");
   const db = getDb();
   const user = db.users.find((u) => u.id === userId);
-  if (!user || user.pin !== pin) {
+  if (!user || !user.active || hashPin(pin, user.salt) !== user.pinHash) {
     redirect("/login?error=1");
   }
-  cookies().set("uid", user.id, {
+  cookies().set("uid", encodeSession(user.id), {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 30,
@@ -27,6 +29,45 @@ export async function login(formData: FormData) {
 export async function logout() {
   cookies().delete("uid");
   redirect("/login");
+}
+
+// ---------- 출퇴근 ----------
+
+export async function clockIn() {
+  const user = getCurrentUser();
+  if (!user) redirect("/login");
+  const db = getDb();
+  const open = db.attendances.find(
+    (a) => a.userId === user.id && a.clockOut === null
+  );
+  if (!open) {
+    db.attendances.push({
+      id: newId(),
+      userId: user.id,
+      date: todayStr(),
+      clockIn: new Date().toISOString(),
+      clockOut: null,
+    });
+    saveDb(db);
+  }
+  revalidatePath("/");
+  redirect("/");
+}
+
+export async function clockOut() {
+  const user = getCurrentUser();
+  if (!user) redirect("/login");
+  const db = getDb();
+  const open = db.attendances.find(
+    (a) => a.userId === user.id && a.clockOut === null
+  );
+  if (open) {
+    open.clockOut = new Date().toISOString();
+    saveDb(db);
+  }
+  revalidatePath("/");
+  revalidatePath("/pay");
+  redirect("/");
 }
 
 // ---------- 업무 보고서 ----------
@@ -201,4 +242,65 @@ export async function addComment(formData: FormData) {
   }
   revalidatePath(`/board/${postId}`);
   redirect(`/board/${postId}`);
+}
+
+// ---------- 직원 관리 (사장님 전용) ----------
+
+export async function addStaff(formData: FormData) {
+  const user = getCurrentUser();
+  if (!user || user.role !== "owner") redirect("/login");
+  const name = String(formData.get("name") ?? "").trim();
+  const pin = String(formData.get("pin") ?? "").trim();
+  if (!name || !/^\d{4}$/.test(pin)) redirect("/staff?error=1");
+  const db = getDb();
+  const salt = newSalt();
+  db.users.push({
+    id: newId(),
+    name,
+    role: "staff",
+    salt,
+    pinHash: hashPin(pin, salt),
+    position: String(formData.get("position") ?? "").trim() || "직원",
+    wage: Math.max(0, Number(formData.get("wage") ?? 0) || 0),
+    active: true,
+  });
+  saveDb(db);
+  revalidatePath("/staff");
+  redirect("/staff");
+}
+
+export async function updateStaff(formData: FormData) {
+  const user = getCurrentUser();
+  if (!user || user.role !== "owner") redirect("/login");
+  const targetId = String(formData.get("targetId") ?? "");
+  const db = getDb();
+  const target = db.users.find((u) => u.id === targetId);
+  if (target) {
+    const position = String(formData.get("position") ?? "").trim();
+    const wage = Number(formData.get("wage") ?? NaN);
+    const newPin = String(formData.get("newPin") ?? "").trim();
+    if (position) target.position = position;
+    if (!Number.isNaN(wage) && wage >= 0) target.wage = wage;
+    if (/^\d{4}$/.test(newPin)) {
+      target.salt = newSalt();
+      target.pinHash = hashPin(newPin, target.salt);
+    }
+    saveDb(db);
+  }
+  revalidatePath("/staff");
+  redirect("/staff");
+}
+
+export async function toggleStaffActive(formData: FormData) {
+  const user = getCurrentUser();
+  if (!user || user.role !== "owner") redirect("/login");
+  const targetId = String(formData.get("targetId") ?? "");
+  const db = getDb();
+  const target = db.users.find((u) => u.id === targetId);
+  if (target && target.role !== "owner") {
+    target.active = !target.active;
+    saveDb(db);
+  }
+  revalidatePath("/staff");
+  redirect("/staff");
 }

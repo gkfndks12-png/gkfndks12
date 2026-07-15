@@ -1,9 +1,45 @@
 {
   "users": [
-    { "id": "u-owner", "name": "김사장", "role": "owner", "pin": "1234", "position": "점주" },
-    { "id": "u-haneul", "name": "이하늘", "role": "staff", "pin": "1111", "position": "홀" },
-    { "id": "u-junyoung", "name": "박준영", "role": "staff", "pin": "2222", "position": "주방" },
-    { "id": "u-yuna", "name": "최유나", "role": "staff", "pin": "3333", "position": "홀" }
+    {
+      "id": "u-owner",
+      "name": "김사장",
+      "role": "owner",
+      "salt": "k3f9a2",
+      "pinHash": "1dbd505eb0847c350488a400060db75d080de129f11a3610426bfe0fac2ea83d",
+      "position": "점주",
+      "wage": 0,
+      "active": true
+    },
+    {
+      "id": "u-haneul",
+      "name": "이하늘",
+      "role": "staff",
+      "salt": "x7m2p1",
+      "pinHash": "4932fcfd5e72415f255e718cb662c25d5bcdd465125d7cc2a70e7a76d601f119",
+      "position": "홀",
+      "wage": 10320,
+      "active": true
+    },
+    {
+      "id": "u-junyoung",
+      "name": "박준영",
+      "role": "staff",
+      "salt": "q9w4e6",
+      "pinHash": "725a1b446cf7bf8e1975233bdc267adadd6aab72ee2ca6ed98ac8b42c3f9717a",
+      "position": "주방",
+      "wage": 10500,
+      "active": true
+    },
+    {
+      "id": "u-yuna",
+      "name": "최유나",
+      "role": "staff",
+      "salt": "z5t8r3",
+      "pinHash": "3d86a12aa4cd2a40247724bea98786150eb44859d6fe5dbd13c59107c8946c6f",
+      "position": "홀",
+      "wage": 10320,
+      "active": true
+    }
   ],
   "reports": [
     {
@@ -43,6 +79,36 @@
     { "id": "s-11", "userId": "u-junyoung", "date": "2026-07-18", "start": "11:00", "end": "18:00", "memo": "주말 피크" },
     { "id": "s-12", "userId": "u-yuna", "date": "2026-07-18", "start": "14:00", "end": "22:00", "memo": "주말 피크" },
     { "id": "s-13", "userId": "u-haneul", "date": "2026-07-19", "start": "11:00", "end": "18:00", "memo": "" }
+  ],
+  "attendances": [
+    {
+      "id": "a-1",
+      "userId": "u-haneul",
+      "date": "2026-07-13",
+      "clockIn": "2026-07-13T09:56:00.000Z",
+      "clockOut": "2026-07-13T16:03:00.000Z"
+    },
+    {
+      "id": "a-2",
+      "userId": "u-junyoung",
+      "date": "2026-07-13",
+      "clockIn": "2026-07-13T15:52:00.000Z",
+      "clockOut": "2026-07-13T22:08:00.000Z"
+    },
+    {
+      "id": "a-3",
+      "userId": "u-haneul",
+      "date": "2026-07-14",
+      "clockIn": "2026-07-14T09:58:00.000Z",
+      "clockOut": "2026-07-14T16:01:00.000Z"
+    },
+    {
+      "id": "a-4",
+      "userId": "u-junyoung",
+      "date": "2026-07-14",
+      "clockIn": "2026-07-14T15:55:00.000Z",
+      "clockOut": "2026-07-14T22:05:00.000Z"
+    }
   ],
   "swapRequests": [
     {

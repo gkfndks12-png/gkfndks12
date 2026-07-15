@@ -24,7 +24,7 @@ export default function LoginPage({
               직원 선택
             </label>
             <select id="userId" name="userId" className="input" required>
-              {db.users.map((u) => (
+              {db.users.filter((u) => u.active).map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.role === "owner" ? "사장님" : u.position})
                 </option>
