@@ -1,0 +1,92 @@
+{
+  "users": [
+    { "id": "u-owner", "name": "김사장", "role": "owner", "pin": "1234", "position": "점주" },
+    { "id": "u-haneul", "name": "이하늘", "role": "staff", "pin": "1111", "position": "홀" },
+    { "id": "u-junyoung", "name": "박준영", "role": "staff", "pin": "2222", "position": "주방" },
+    { "id": "u-yuna", "name": "최유나", "role": "staff", "pin": "3333", "position": "홀" }
+  ],
+  "reports": [
+    {
+      "id": "r-1",
+      "authorId": "u-haneul",
+      "date": "2026-07-14",
+      "start": "10:00",
+      "end": "16:00",
+      "tasks": "오픈 준비, 홀 서빙, 재고 정리 (컵/빨대 보충)",
+      "issues": "점심 피크에 포스기가 한 번 멈춤. 재부팅 후 정상 작동.",
+      "handover": "우유 재고가 2팩 남았습니다. 내일 오전 발주 필요해요.",
+      "createdAt": "2026-07-14T16:05:00.000Z"
+    },
+    {
+      "id": "r-2",
+      "authorId": "u-junyoung",
+      "date": "2026-07-14",
+      "start": "16:00",
+      "end": "22:00",
+      "tasks": "저녁 마감, 주방 청소, 식자재 유통기한 점검",
+      "issues": "특이사항 없음",
+      "handover": "마감 청소 완료했습니다. 냉장고 온도 정상.",
+      "createdAt": "2026-07-14T22:10:00.000Z"
+    }
+  ],
+  "shifts": [
+    { "id": "s-1", "userId": "u-haneul", "date": "2026-07-13", "start": "10:00", "end": "16:00", "memo": "" },
+    { "id": "s-2", "userId": "u-junyoung", "date": "2026-07-13", "start": "16:00", "end": "22:00", "memo": "" },
+    { "id": "s-3", "userId": "u-haneul", "date": "2026-07-14", "start": "10:00", "end": "16:00", "memo": "" },
+    { "id": "s-4", "userId": "u-junyoung", "date": "2026-07-14", "start": "16:00", "end": "22:00", "memo": "" },
+    { "id": "s-5", "userId": "u-yuna", "date": "2026-07-15", "start": "10:00", "end": "16:00", "memo": "" },
+    { "id": "s-6", "userId": "u-haneul", "date": "2026-07-15", "start": "16:00", "end": "22:00", "memo": "" },
+    { "id": "s-7", "userId": "u-yuna", "date": "2026-07-16", "start": "10:00", "end": "16:00", "memo": "" },
+    { "id": "s-8", "userId": "u-junyoung", "date": "2026-07-16", "start": "16:00", "end": "22:00", "memo": "" },
+    { "id": "s-9", "userId": "u-haneul", "date": "2026-07-17", "start": "10:00", "end": "16:00", "memo": "" },
+    { "id": "s-10", "userId": "u-yuna", "date": "2026-07-17", "start": "16:00", "end": "22:00", "memo": "" },
+    { "id": "s-11", "userId": "u-junyoung", "date": "2026-07-18", "start": "11:00", "end": "18:00", "memo": "주말 피크" },
+    { "id": "s-12", "userId": "u-yuna", "date": "2026-07-18", "start": "14:00", "end": "22:00", "memo": "주말 피크" },
+    { "id": "s-13", "userId": "u-haneul", "date": "2026-07-19", "start": "11:00", "end": "18:00", "memo": "" }
+  ],
+  "swapRequests": [
+    {
+      "id": "sw-1",
+      "shiftId": "s-10",
+      "requesterId": "u-yuna",
+      "reason": "가족 행사가 있어서 금요일 저녁 근무가 어렵습니다. 대타 부탁드려요!",
+      "status": "pending",
+      "acceptedBy": null,
+      "createdAt": "2026-07-13T09:00:00.000Z"
+    }
+  ],
+  "posts": [
+    {
+      "id": "p-1",
+      "authorId": "u-owner",
+      "category": "notice",
+      "title": "7월 셋째 주 공지 — 신메뉴 출시 & 위생 점검",
+      "content": "이번 주 수요일부터 신메뉴 '흑임자 라떼'가 출시됩니다. 레시피는 주방 게시판에 붙여두었으니 근무 전 꼭 확인해주세요.\n\n또한 금요일 오전에 위생 점검이 예정되어 있습니다. 목요일 마감조는 냉장고 정리를 평소보다 꼼꼼히 부탁드립니다.",
+      "createdAt": "2026-07-13T08:30:00.000Z",
+      "comments": [
+        {
+          "id": "c-1",
+          "authorId": "u-haneul",
+          "content": "확인했습니다! 레시피 숙지할게요.",
+          "createdAt": "2026-07-13T10:15:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": "p-2",
+      "authorId": "u-junyoung",
+      "category": "free",
+      "title": "제빙기 필터 교체 시기 문의",
+      "content": "제빙기 얼음에서 살짝 냄새가 나는 것 같은데, 필터 교체한 지 얼마나 됐을까요? 확인 부탁드립니다.",
+      "createdAt": "2026-07-14T20:00:00.000Z",
+      "comments": [
+        {
+          "id": "c-2",
+          "authorId": "u-owner",
+          "content": "지난달 초에 교체했는데, 내일 업체에 점검 요청해둘게요. 알려줘서 고마워요.",
+          "createdAt": "2026-07-14T21:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}
