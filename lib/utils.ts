@@ -72,6 +72,22 @@ export function addMonths(month: string, n: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+/** 월간 캘린더 그리드 (월요일 시작, 앞뒤 패딩은 null) */
+export function monthGrid(month: string): (string | null)[][] {
+  const [y, m] = month.split("-").map(Number);
+  const first = new Date(y, m - 1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const lead = (first.getDay() + 6) % 7; // 월요일=0
+  const cells: (string | null)[] = Array(lead).fill(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(`${month}-${String(d).padStart(2, "0")}`);
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+  const weeks: (string | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  return weeks;
+}
+
 /** ISO 문자열 → "14:30" */
 export function formatTimeHM(iso: string): string {
   const d = new Date(iso);

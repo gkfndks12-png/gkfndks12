@@ -40,8 +40,19 @@ export default function SchedulePage({
     <>
       <Nav user={user} />
       <main className="mx-auto max-w-4xl space-y-4 px-4 py-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">주간 근무표</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold">근무표</h1>
+            <div className="flex rounded-lg bg-slate-200 p-0.5 text-xs font-semibold">
+              <span className="rounded-md bg-white px-3 py-1 shadow-sm">주간</span>
+              <Link
+                href={`/schedule/month?month=${monday.slice(0, 7)}`}
+                className="rounded-md px-3 py-1 text-slate-500"
+              >
+                월간
+              </Link>
+            </div>
+          </div>
           <div className="flex items-center gap-2 text-sm">
             <Link href={`/schedule?week=${addDays(monday, -7)}`} className="btn-ghost">
               ← 지난주

@@ -71,6 +71,24 @@ export interface Post {
   comments: Comment[];
 }
 
+export type NotificationType =
+  | "swap_request"
+  | "swap_accepted"
+  | "notice"
+  | "comment"
+  | "shift_assigned"
+  | "shift_removed";
+
+export interface Notification {
+  id: string;
+  userId: string; // 받는 사람
+  type: NotificationType;
+  message: string;
+  link: string;
+  read: boolean;
+  createdAt: string; // ISO
+}
+
 export interface Database {
   users: User[];
   reports: Report[];
@@ -78,4 +96,5 @@ export interface Database {
   attendances: Attendance[];
   swapRequests: SwapRequest[];
   posts: Post[];
+  notifications: Notification[];
 }

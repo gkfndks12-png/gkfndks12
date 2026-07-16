@@ -6,7 +6,29 @@ import { cookies } from "next/headers";
 import { getDb, saveDb, newId } from "./db";
 import { getCurrentUser } from "./auth";
 import { encodeSession, hashPin, newSalt } from "./security";
-import { todayStr } from "./utils";
+import { formatShort, todayStr } from "./utils";
+import type { Database, NotificationType } from "./types";
+
+function notify(
+  db: Database,
+  userIds: string[],
+  type: NotificationType,
+  message: string,
+  link: string
+) {
+  const now = new Date().toISOString();
+  for (const uid of Array.from(new Set(userIds))) {
+    db.notifications.unshift({
+      id: newId(),
+      userId: uid,
+      type,
+      message,
+      link,
+      read: false,
+      createdAt: now,
+    });
+  }
+}
 
 // ---------- 인증 ----------
 
@@ -100,14 +122,24 @@ export async function createShift(formData: FormData) {
   if (!user || user.role !== "owner") redirect("/login");
   const db = getDb();
   const date = String(formData.get("date") ?? "");
+  const assigneeId = String(formData.get("userId") ?? "");
+  const start = String(formData.get("start") ?? "");
+  const end = String(formData.get("end") ?? "");
   db.shifts.push({
     id: newId(),
-    userId: String(formData.get("userId") ?? ""),
+    userId: assigneeId,
     date,
-    start: String(formData.get("start") ?? ""),
-    end: String(formData.get("end") ?? ""),
+    start,
+    end,
     memo: String(formData.get("memo") ?? "").trim(),
   });
+  notify(
+    db,
+    [assigneeId],
+    "shift_assigned",
+    `📅 ${formatShort(date)} ${start}~${end} 근무가 배정되었어요.`,
+    `/schedule?week=${date}`
+  );
   saveDb(db);
   revalidatePath("/schedule");
   revalidatePath("/");
@@ -127,6 +159,15 @@ export async function deleteShift(formData: FormData) {
       ? { ...r, status: "cancelled" as const }
       : r
   );
+  if (shift) {
+    notify(
+      db,
+      [shift.userId],
+      "shift_removed",
+      `🗑️ ${formatShort(shift.date)} ${shift.start}~${shift.end} 근무가 취소되었어요.`,
+      `/schedule?week=${shift.date}`
+    );
+  }
   saveDb(db);
   revalidatePath("/schedule");
   revalidatePath("/");
@@ -155,6 +196,15 @@ export async function requestSwap(formData: FormData) {
       acceptedBy: null,
       createdAt: new Date().toISOString(),
     });
+    notify(
+      db,
+      db.users
+        .filter((u) => u.active && u.id !== user.id)
+        .map((u) => u.id),
+      "swap_request",
+      `🙋 ${user.name}님이 ${formatShort(shift.date)} ${shift.start}~${shift.end} 근무 대타를 요청했어요.`,
+      `/schedule?week=${shift.date}`
+    );
     saveDb(db);
   }
   revalidatePath("/schedule");
@@ -173,6 +223,20 @@ export async function acceptSwap(formData: FormData) {
     req.acceptedBy = user.id;
     const shift = db.shifts.find((s) => s.id === req.shiftId);
     if (shift) shift.userId = user.id;
+    const requesterName =
+      db.users.find((u) => u.id === req.requesterId)?.name ?? "직원";
+    notify(
+      db,
+      [
+        req.requesterId,
+        ...db.users.filter((u) => u.role === "owner").map((u) => u.id),
+      ].filter((id) => id !== user.id),
+      "swap_accepted",
+      `✅ ${user.name}님이 ${requesterName}님의 ${
+        shift ? `${formatShort(shift.date)} ${shift.start}~${shift.end} ` : ""
+      }근무를 대신하기로 했어요.`,
+      shift ? `/schedule?week=${shift.date}` : "/schedule"
+    );
     saveDb(db);
   }
   revalidatePath("/schedule");
@@ -207,15 +271,27 @@ export async function createPost(formData: FormData) {
   if (category === "notice" && user.role !== "owner") category = "free";
   const db = getDb();
   const id = newId();
+  const title = String(formData.get("title") ?? "").trim();
   db.posts.unshift({
     id,
     authorId: user.id,
     category: category as "notice" | "free",
-    title: String(formData.get("title") ?? "").trim(),
+    title,
     content: String(formData.get("content") ?? "").trim(),
     createdAt: new Date().toISOString(),
     comments: [],
   });
+  if (category === "notice") {
+    notify(
+      db,
+      db.users
+        .filter((u) => u.active && u.id !== user.id)
+        .map((u) => u.id),
+      "notice",
+      `📢 새 공지: ${title}`,
+      `/board/${id}`
+    );
+  }
   saveDb(db);
   revalidatePath("/board");
   revalidatePath("/");
@@ -237,11 +313,38 @@ export async function addComment(formData: FormData) {
         content,
         createdAt: new Date().toISOString(),
       });
+      if (post.authorId !== user.id) {
+        notify(
+          db,
+          [post.authorId],
+          "comment",
+          `💬 ${user.name}님이 '${post.title}' 글에 댓글을 남겼어요.`,
+          `/board/${post.id}`
+        );
+      }
       saveDb(db);
     }
   }
   revalidatePath(`/board/${postId}`);
   redirect(`/board/${postId}`);
+}
+
+// ---------- 알림 ----------
+
+export async function markAllNotificationsRead() {
+  const user = getCurrentUser();
+  if (!user) redirect("/login");
+  const db = getDb();
+  let changed = false;
+  for (const n of db.notifications) {
+    if (n.userId === user.id && !n.read) {
+      n.read = true;
+      changed = true;
+    }
+  }
+  if (changed) saveDb(db);
+  revalidatePath("/notifications");
+  redirect("/notifications");
 }
 
 // ---------- 직원 관리 (사장님 전용) ----------
